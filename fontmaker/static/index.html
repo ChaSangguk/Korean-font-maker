@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>한글 폰트 메이커</title>
+  <style>
+    :root { color-scheme: light; font-family: system-ui, sans-serif; color: #172032; background:#f5f7fb; }
+    body { max-width: 980px; margin: 0 auto; padding: 36px 20px 80px; }
+    h1 { margin-bottom: 6px; } .lead { color:#526077; margin-top:0; }
+    section { background:#fff; border:1px solid #dce3ef; border-radius:16px; padding:22px; margin-top:18px; }
+    label { display:block; font-weight:700; margin-top:12px; } input, select, button { font:inherit; padding:9px 11px; border-radius:8px; border:1px solid #bdc7d9; }
+    button { background:#315efb; border-color:#315efb; color:#fff; cursor:pointer; font-weight:700; margin-top:12px; } button:disabled { opacity:.5; cursor:not-allowed; }
+    canvas { display:block; margin-top:12px; width:320px; height:320px; image-rendering:auto; background:#fff; border:2px solid #8695ad; border-radius:8px; touch-action:none; }
+    #preview { max-width:100%; min-height:64px; margin-top:12px; border:1px solid #dce3ef; background:#fff; image-rendering:pixelated; }
+    .row { display:flex; gap:12px; flex-wrap:wrap; align-items:end; } .status { color:#315efb; min-height:1.5em; }
+    .hint { color:#59667b; font-size:.92rem; }
+    .layouts { display:flex; gap:18px; flex-wrap:wrap; margin:16px 0; }
+    .layout-card { margin:0; } .layout-card figcaption { font-size:.82rem; color:#59667b; margin-top:6px; text-align:center; }
+    .diagram { position:relative; width:128px; height:128px; border:2px solid #172032; background:#fff; }
+    .slot { position:absolute; display:grid; place-items:center; box-sizing:border-box; border:1px dashed #91a0b8; color:#526077; background:#f8faff; font-size:.8rem; }
+    .v-open .initial { left:3%; top:6%; width:56%; height:88%; } .v-open .medial { left:62%; top:6%; width:34%; height:88%; }
+    .v-final .initial { left:3%; top:3%; width:56%; height:56%; } .v-final .medial { left:62%; top:3%; width:34%; height:56%; } .v-final .final { left:12%; top:66%; width:76%; height:30%; }
+    .h-open .initial { left:9%; top:3%; width:82%; height:56%; } .h-open .medial { left:9%; top:63%; width:82%; height:33%; }
+    .h-final .initial { left:12%; top:3%; width:76%; height:38%; } .h-final .medial { left:9%; top:44%; width:82%; height:22%; } .h-final .final { left:12%; top:69%; width:76%; height:27%; }
+    .compound .initial { left:4%; top:4%; width:44%; height:44%; z-index:2; }
+    .compound .medial-v, .compound .medial-h { background:#e8efff; border:2px solid #6f82aa; color:#344765; }
+    .compound .medial-v { right:3%; top:3%; width:28%; height:94%; border-left-style:dashed; }
+    .compound .medial-h { left:3%; bottom:3%; width:72%; height:27%; border-top-style:dashed; }
+  </style>
+</head>
+<body>
+  <h1>한글 폰트 메이커</h1>
+  <p class="lead">종이에 쓴 글씨나 직접 그린 자모로 게임용 한글 폰트를 만들어 보세요.</p>
+  <section>
+    <h2>1. 프로젝트 시작</h2>
+    <div class="row"><label>폰트 이름 <input id="name" value="나의 게임 폰트"></label><button id="create">프로젝트 만들기</button></div>
+    <p class="status" id="project-status">프로젝트를 먼저 만드세요.</p>
+  </section>
+  <section>
+    <h2>2. 완성 글자 그리기 또는 사진 가져오기</h2>
+    <p class="hint">안내 슬롯을 따라 완성 글자 한 글자를 크게 그리면, 초성·중성·종성 조각으로 자동 분리됩니다.</p>
+    <div class="layouts" aria-label="다섯 가지 한글 조합 슬롯">
+      <figure class="layout-card"><div class="diagram v-open"><div class="slot initial">초성</div><div class="slot medial">중성</div></div><figcaption>형태 1<br>ㅏ ㅐ ㅑ ㅒ ㅓ ㅔ ㅕ ㅖ ㅣ</figcaption></figure>
+      <figure class="layout-card"><div class="diagram h-open"><div class="slot initial">초성</div><div class="slot medial">중성</div></div><figcaption>형태 2-1<br>ㅗ ㅛ ㅡ</figcaption></figure>
+      <figure class="layout-card"><div class="diagram compound"><div class="slot initial">초성</div><div class="slot medial-v"></div><div class="slot medial-h">복합 중성</div></div><figcaption>형태 2-2<br>ㅘ ㅙ ㅚ ㅢ</figcaption></figure>
+      <figure class="layout-card"><div class="diagram h-open"><div class="slot initial">초성</div><div class="slot medial">중성</div></div><figcaption>형태 3-1<br>ㅜ ㅠ</figcaption></figure>
+      <figure class="layout-card"><div class="diagram compound"><div class="slot initial">초성</div><div class="slot medial-v"></div><div class="slot medial-h">복합 중성</div></div><figcaption>형태 3-2<br>ㅝ ㅞ ㅟ</figcaption></figure>
+    </div>
+    <div class="row">
+      <label>먼저 쓸 완성 글자 <select id="syllable"><option value="가">1/198 · 가</option></select></label>
+      <label>완성 글자 사진 업로드 <input id="photo" type="file" accept="image/*"></label>
+    </div>
+    <p class="hint" id="sample-progress">대표 글자 목록을 불러오는 중입니다.</p>
+    <canvas id="pad" width="512" height="512" aria-label="완성 글자 그리기 영역"></canvas>
+    <div class="row"><button id="undo" disabled>실행 취소</button><button id="redo" disabled>다시 실행</button><button id="clear">전체 지우기</button><button id="save-syllable" disabled>자모로 분리하여 저장</button></div>
+    <p class="status" id="save-status"></p>
+    <details>
+      <summary>고급: 자모 조각을 직접 입력</summary>
+      <div class="row"><label>입력할 조각 <select id="component"></select></label><label>직접 조각 키 <input id="custom-component" placeholder="예: initial:ㄴ:top-open"></label></div>
+      <button id="save-component" disabled>현재 그림을 조각으로 저장</button>
+    </details>
+  </section>
+  <section>
+    <h2>3. 문장으로 확인</h2>
+    <div class="row"><label>게임 대사 <input id="text" value="가각 고광 귀여운 게임입니다"></label><button id="refresh" disabled>미리보기</button></div>
+    <img id="preview" alt="생성된 한글 폰트 미리보기">
+  </section>
+  <section>
+    <h2>4. TTF로 내보내기</h2>
+    <p class="hint">내보내기는 현대 한글 11,172자를 생성하므로 잠시 걸릴 수 있습니다.</p>
+    <button id="export" disabled>TTF 다운로드</button>
+  </section>
+  <script>
+    const canvas=document.querySelector('#pad'), ctx=canvas.getContext('2d');
+    const componentSelect=document.querySelector('#component'), syllableInput=document.querySelector('#syllable');
+    const initials='ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ', medials='ㅏㅐㅑㅒㅓㅔㅕㅖㅗㅘㅙㅚㅛㅜㅝㅞㅟㅠㅡㅢㅣ', finals='ㄱㄲㄳㄴㄵㄶㄷㄹㄺㄻㄼㄽㄾㄿㅀㅁㅂㅄㅅㅆㅇㅈㅊㅋㅌㅍㅎ';
+    const forms=[['vertical-open','세로·받침 없음'],['vertical-final','세로·받침 있음'],['top-open','위 가로·받침 없음'],['top-final','위 가로·받침 있음'],['top-right-open','위 복합·받침 없음'],['top-right-final','위 복합·받침 있음'],['bottom-open','아래 가로·받침 없음'],['bottom-final','아래 가로·받침 있음'],['bottom-right-open','아래 복합·받침 없음'],['bottom-right-final','아래 복합·받침 있음']];
+    const DRAW_SCALE=8, HISTORY_LIMIT=40;
+    let projectId=null, drawing=false, history=[], historyIndex=-1;
+
+    function addOptions(label,values){const group=document.createElement('optgroup');group.label=label;for(const [value,text] of values){const option=document.createElement('option');option.value=value;option.textContent=text;group.append(option);}componentSelect.append(group);}
+    addOptions('초성 190개',[...initials].flatMap(letter=>forms.map(([form,label])=>[`initial:${letter}:${form}`,`초성 ${letter} · ${label}`])));
+    addOptions('중성 42개',[...medials].flatMap(letter=>[['open','받침 없음'],['final','받침 있음']].map(([form,label])=>[`medial:${letter}:${form}`,`중성 ${letter} · ${label}`])));
+    addOptions('종성 54개',[...finals].flatMap(letter=>[['vertical-final','세로 모음'],['horizontal-final','가로·복합 모음']].map(([form,label])=>[`final:${letter}:${form}`,`종성 ${letter} · ${label}`])));
+
+    async function request(url,options){const response=await fetch(url,options);const data=await response.json();if(!response.ok)throw new Error(data.error);return data;}
+    function syllableParts(value){const code=value.codePointAt(0);if(!code||code<0xAC00||code>0xD7A3)throw new Error('현대 한글 완성형 한 글자를 입력하세요.');const offset=code-0xAC00;return{initial:[...initials][Math.floor(offset/588)],medial:[...medials][Math.floor((offset%588)/28)],finalIndex:offset%28};}
+    function slotsFor(value){const p=syllableParts(value),final=p.finalIndex!==0,v=p.medial;if('ㅏㅐㅑㅒㅓㅔㅕㅖㅣ'.includes(v))return final?{초성:[2,2,36,36],중성:[40,2,22,36],종성:[8,42,48,20]}:{초성:[2,4,36,56],중성:[40,4,22,56]};if('ㅗㅛㅡ'.includes(v))return final?{초성:[8,2,48,24],중성:[6,28,52,14],종성:[8,44,48,18]}:{초성:[6,2,52,36],중성:[6,40,52,22]};if('ㅘㅙㅚㅢ'.includes(v))return final?{초성:[4,2,28,24],중성:[2,2,60,40],종성:[8,44,48,18]}:{초성:[4,4,28,28],중성:[2,2,60,60]};if('ㅜㅠ'.includes(v))return final?{초성:[8,2,48,24],중성:[6,28,52,14],종성:[8,44,48,18]}:{초성:[6,2,52,36],중성:[6,40,52,22]};return final?{초성:[4,2,28,26],중성:[2,2,60,40],종성:[8,44,48,18]}:{초성:[4,2,28,30],중성:[2,2,60,60]};}
+    function drawGuide(){try{const parts=syllableParts(syllableInput.value),compound='ㅘㅙㅚㅢㅝㅞㅟ'.includes(parts.medial);ctx.save();ctx.scale(DRAW_SCALE,DRAW_SCALE);ctx.strokeStyle='#bdc8d9';ctx.fillStyle='#7f8da5';ctx.lineWidth=.75;ctx.setLineDash([2,2]);ctx.font='6px sans-serif';for(const [label,[x,y,w,h]] of Object.entries(slotsFor(syllableInput.value))){if(label==='중성'&&compound){const cutX=Math.round(w*.48),cutY=Math.round(h*.68);ctx.beginPath();ctx.moveTo(x+cutX,y+.5);ctx.lineTo(x+w-.5,y+.5);ctx.lineTo(x+w-.5,y+h-.5);ctx.lineTo(x+.5,y+h-.5);ctx.lineTo(x+.5,y+cutY);ctx.lineTo(x+cutX,y+cutY);ctx.closePath();ctx.stroke();ctx.fillText(label,x+w-14,y+7);}else{ctx.strokeRect(x+.5,y+.5,w-1,h-1);ctx.fillText(label,x+2,y+7);}}ctx.restore();}catch(_){}}
+    function preparePen(){ctx.strokeStyle='black';ctx.lineWidth=24;ctx.lineCap='round';ctx.lineJoin='round';ctx.setLineDash([]);}
+    function updateHistoryButtons(){document.querySelector('#undo').disabled=historyIndex<=0;document.querySelector('#redo').disabled=historyIndex>=history.length-1;}
+    function snapshot(){const state=canvas.toDataURL('image/png');if(history[historyIndex]===state)return;history=history.slice(0,historyIndex+1);history.push(state);if(history.length>HISTORY_LIMIT)history.shift();historyIndex=history.length-1;updateHistoryButtons();}
+    function paintBlank(record=true,restart=false){ctx.fillStyle='white';ctx.fillRect(0,0,canvas.width,canvas.height);drawGuide();preparePen();if(restart){history=[];historyIndex=-1;}if(record)snapshot();}
+    function restoreHistory(index){if(index<0||index>=history.length)return;const image=new Image();image.onload=()=>{ctx.clearRect(0,0,canvas.width,canvas.height);ctx.drawImage(image,0,0,canvas.width,canvas.height);preparePen();historyIndex=index;updateHistoryButtons();};image.src=history[index];}
+    function point(event){const r=canvas.getBoundingClientRect();return[(event.clientX-r.left)*canvas.width/r.width,(event.clientY-r.top)*canvas.height/r.height];}
+    function updateProgress(){const option=syllableInput.options[syllableInput.selectedIndex];document.querySelector('#sample-progress').textContent=option?`${syllableInput.selectedIndex+1}/${syllableInput.options.length} · ${option.dataset.description||''}`:'';}
+    async function loadSamples(){try{const data=await request('/api/samples');syllableInput.replaceChildren();data.samples.forEach((sample,index)=>{const option=document.createElement('option');option.value=sample.syllable;option.textContent=`${index+1}/${data.count} · ${sample.syllable} · ${sample.description}`;option.dataset.description=sample.description;syllableInput.append(option);});updateProgress();paintBlank(true,true);}catch(e){document.querySelector('#sample-progress').textContent=e.message;}}
+
+    canvas.addEventListener('pointerdown',e=>{drawing=true;canvas.setPointerCapture(e.pointerId);const[x,y]=point(e);ctx.beginPath();ctx.moveTo(x,y);});
+    canvas.addEventListener('pointermove',e=>{if(!drawing)return;const[x,y]=point(e);ctx.lineTo(x,y);ctx.stroke();});
+    canvas.addEventListener('pointerup',()=>{if(drawing){drawing=false;snapshot();}});
+    canvas.addEventListener('pointercancel',()=>drawing=false);
+    document.querySelector('#clear').onclick=()=>paintBlank(true,false);
+    document.querySelector('#undo').onclick=()=>restoreHistory(historyIndex-1);
+    document.querySelector('#redo').onclick=()=>restoreHistory(historyIndex+1);
+    syllableInput.addEventListener('change',()=>{updateProgress();paintBlank(true,true);});
+    document.addEventListener('keydown',event=>{if(!(event.ctrlKey||event.metaKey))return;if(event.key.toLowerCase()==='z'){event.preventDefault();event.shiftKey?restoreHistory(historyIndex+1):restoreHistory(historyIndex-1);}else if(event.key.toLowerCase()==='y'){event.preventDefault();restoreHistory(historyIndex+1);}});
+
+    document.querySelector('#create').onclick=async()=>{try{const data=await request('/api/projects',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:document.querySelector('#name').value})});projectId=data.id;document.querySelector('#project-status').textContent=`${data.name} 프로젝트를 만들었습니다.`;['#save-syllable','#save-component','#refresh','#export'].forEach(id=>document.querySelector(id).disabled=false);}catch(e){alert(e.message);}};
+    document.querySelector('#photo').onchange=e=>{const file=e.target.files[0];if(!file)return;const image=new Image();image.onload=()=>{ctx.fillStyle='white';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(image,0,0,canvas.width,canvas.height);drawGuide();preparePen();snapshot();};image.src=URL.createObjectURL(file);};
+    document.querySelector('#save-syllable').onclick=async()=>{try{const currentIndex=syllableInput.selectedIndex;const data=await request('/api/syllables',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({project:projectId,syllable:syllableInput.value,image:canvas.toDataURL('image/png')})});if(currentIndex<syllableInput.options.length-1){syllableInput.selectedIndex=currentIndex+1;updateProgress();paintBlank(true,true);document.querySelector('#save-status').textContent=`${data.syllable} 분리 저장 완료 · 다음 글자 ${syllableInput.value}`;}else{document.querySelector('#save-status').textContent=`${data.syllable} 분리 저장 완료 · 198개 입력 완료`;}}catch(e){alert(e.message);}};
+    document.querySelector('#save-component').onclick=async()=>{try{const key=document.querySelector('#custom-component').value.trim()||componentSelect.value;const data=await request('/api/components',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({project:projectId,key,image:canvas.toDataURL('image/png')})});document.querySelector('#save-status').textContent=`${data.saved} 저장 완료`;}catch(e){alert(e.message);}};
+    document.querySelector('#refresh').onclick=()=>{document.querySelector('#preview').src=`/api/preview?project=${encodeURIComponent(projectId)}&text=${encodeURIComponent(document.querySelector('#text').value)}&v=${Date.now()}`;};
+    document.querySelector('#export').onclick=()=>{window.location=`/api/export?project=${encodeURIComponent(projectId)}`;};
+    paintBlank(true,true);loadSamples();
+  </script>
+</body>
+</html>
